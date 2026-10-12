@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Transición suave entre páginas */
+body {
+  opacity: 1;
+  transition: opacity 0.25s ease-in-out;
+}
+
+body.fade-out {
+  opacity: 0;
+}
+
+/* Evita clics repetidos mientras se obtiene la siguiente vista. */
+body.is-navigating {
+  cursor: progress;
+}
+
+body.is-navigating main {
+  opacity: 0.72;
+  transition: opacity 0.15s ease-in-out;
+}
+
+
+
+/* Transición de entrada y salida suave para todas las páginas */
+body {
+  opacity: 1;
+  transition: opacity 0.22s ease-in-out;
+}
+
+/* Estado al salir de la página */
+body.fade-out {
+  opacity: 0;
+}

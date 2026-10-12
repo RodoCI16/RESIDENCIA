@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventario de Medicamentos | Hospital Mazahua</title>
+  <link rel="stylesheet" href="./dist/css/output.css">
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col min-h-screen transition-colors duration-300">
+
+  <!-- HEADER ADMINISTRATIVO (Solo Logos + Hamburguesa de Usuario) -->
+  <header class="fixed top-0 left-0 w-full h-20 bg-[#eef2f6]/95 backdrop-blur-md border-b-4 border-[#164e63] shadow-md z-40 transition-colors">
+    <div class="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+      
+      <!-- Logos Oficiales -->
+      <div class="flex items-center gap-2.5 sm:gap-4 select-none">
+        <img 
+          src="./src/assets/logos/logo hospital.png" 
+          alt="Logo Hospital Mazahua" 
+          class="h-10 sm:h-14 w-auto object-contain"
+        >
+        <img 
+          src="./src/assets/logos/logo cofas.png" 
+          alt="Logo COFAS" 
+          class="h-10 sm:h-14 w-auto object-contain"
+        >
+      </div>
+
+      <!-- Menú Derecho: Botón Tema + Menú Hamburguesa -->
+      <div class="flex items-center gap-3 relative">
+        <!-- Alternar Tema -->
+        <button 
+          id="theme-toggle" 
+          type="button" 
+          class="p-2 rounded-xl text-[#0b2545] hover:text-cyan-800 hover:bg-slate-300/50 transition-colors cursor-pointer" 
+          title="Modo claro/oscuro"
+        >
+          <svg id="sun-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+          <svg id="moon-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+          </svg>
+        </button>
+
+        <!-- Botón Menú Hamburguesa de Usuario -->
+        <button 
+          id="btn-user-menu" 
+          type="button" 
+          class="flex items-center gap-2 p-2 sm:px-3.5 sm:py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-[#0b2545] dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-sm transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-cyan-600"
+          aria-expanded="false"
+        >
+          <svg class="w-6 h-6 text-[#164e63] dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
+          </svg>
+          <span id="nav-user-firstname" class="hidden md:inline text-xs font-bold tracking-wide">Usuario</span>
+        </button>
+
+        <!-- Menú Desplegable Flotante -->
+        <div 
+          id="user-dropdown" 
+          class="absolute right-0 top-14 w-64 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 py-3 hidden opacity-0 translate-y-2 transition-all duration-200 z-50 text-slate-800 dark:text-slate-100"
+        >
+          <!-- Ficha del Usuario (Limpia: solo Nombre y Rol plano) -->
+          <div class="px-5 py-2.5 border-b border-slate-100 dark:border-slate-700/70">
+            <h4 id="user-display-name" class="text-sm font-bold text-slate-900 dark:text-white truncate">Cargando...</h4>
+            <p id="user-role-text" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">Rol: Usuario</p>
+          </div>
+
+          <!-- Opciones del Menú -->
+          <div class="py-2 px-2 space-y-1">
+            <!-- Opción Exclusiva: Super Usuario -->
+            <button 
+              id="opt-add-user" 
+              type="button" 
+              class="hidden w-full flex items-center gap-3 px-3 py-2 text-xs font-semibold text-cyan-800 dark:text-cyan-300 hover:bg-cyan-50 dark:hover:bg-cyan-950/40 rounded-xl transition-colors text-left cursor-pointer"
+            >
+              <div class="p-1.5 rounded-lg bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                </svg>
+              </div>
+              <div>
+                <span class="block">Registrar nuevo usuario</span>
+                <span class="block text-[10px] text-slate-400 font-normal">Exclusivo Super Usuario</span>
+              </div>
+            </button>
+
+            <!-- Cerrar Sesión -->
+            <button 
+              id="btn-trigger-logout" 
+              type="button" 
+              class="w-full flex items-center gap-3 px-3 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl transition-colors text-left cursor-pointer"
+            >
+              <div class="p-1.5 rounded-lg bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                </svg>
+              </div>
+              <span>Cerrar sesión</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL: PANEL DE INVENTARIO -->
+  <main class="flex-grow pt-28 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-8">
+    
+    <!-- Encabezado de Sección y Acciones Rápidas -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+          Gestión de medicamentos
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+          Supervisión de existencias, control de lotes y monitoreo de caducidades críticas.
+        </p>
+      </div>
+
+      <!-- Botones de Acción Inmediata -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        <button 
+          id="btn-stock-in" 
+          type="button" 
+          class="flex items-center gap-2 bg-[#164e63] hover:bg-[#0e3645] text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md shadow-cyan-950/10 transition-all active:scale-95 cursor-pointer"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          <span>Nueva Entrada</span>
+        </button>
+
+        <button 
+          id="btn-stock-out" 
+          type="button" 
+          class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md transition-all active:scale-95 cursor-pointer"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+          </svg>
+          <span>Salida</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- TARJETAS DE MÉTRICAS (KPIs) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Métrica 1 -->
+      <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between">
+        <div>
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total de Medicamentos</span>
+          <p id="kpi-total-types" class="text-2xl font-black text-slate-900 dark:text-white mt-1">128</p>
+          <span class="text-[11px] text-cyan-600 dark:text-cyan-400 font-medium">Claves registradas</span>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-cyan-50 dark:bg-cyan-950/50 text-[#164e63] dark:text-cyan-400 flex items-center justify-center">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Métrica 2 -->
+      <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between">
+        <div>
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Unidades en Almacén</span>
+          <p id="kpi-total-units" class="text-2xl font-black text-slate-900 dark:text-white mt-1">3,420</p>
+          <span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">Piezas disponibles</span>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Métrica 3: Alerta Caducidad Próxima (Actualizado a: - de 60 días) -->
+      <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-amber-200 dark:border-amber-900/50 shadow-sm flex items-center justify-between">
+        <div>
+          <span class="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Por Caducar (- de 60 días)</span>
+          <p id="kpi-expiring" class="text-2xl font-black text-amber-600 dark:text-amber-400 mt-1">14</p>
+          <span class="text-[11px] text-slate-500 dark:text-slate-400">Atención prioritaria</span>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Métrica 4: Agotados / Críticos -->
+      <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-red-200 dark:border-red-900/50 shadow-sm flex items-center justify-between">
+        <div>
+          <span class="text-[11px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">Stock Crítico / Agotado</span>
+          <p id="kpi-out-stock" class="text-2xl font-black text-red-600 dark:text-red-400 mt-1">3</p>
+          <span class="text-[11px] text-slate-500 dark:text-slate-400">Requiere pedido</span>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 flex items-center justify-center">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- BARRA DE BÚSQUEDA Y FILTRADO DINÁMICO -->
+    <div class="bg-white dark:bg-slate-800 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
+      <div class="relative w-full md:w-96">
+        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </span>
+        <input 
+          type="text" 
+          id="search-medicine" 
+          placeholder="Buscar medicamento, sustancia o lote..." 
+          class="w-full pl-10 pr-4 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-600 transition-all"
+        />
+      </div>
+
+      <div class="flex flex-wrap w-full md:w-auto items-center gap-2">
+        <select 
+          id="filter-category" 
+          class="text-xs rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 py-2 px-3 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 cursor-pointer"
+        >
+          <option value="">Todas las categorías</option>
+          <option value="Analgesico">Analgésicos</option>
+          <option value="Antibiotico">Antibióticos</option>
+          <option value="Antiinflamatorio">Antiinflamatorios</option>
+          <option value="Cardiovascular">Cardiovascular</option>
+          <option value="Material">Material de Curación</option>
+        </select>
+
+        <select 
+          id="filter-expiry" 
+          class="text-xs rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 py-2 px-3 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 cursor-pointer"
+        >
+          <option value="">Todo el estado de caducidad</option>
+          <option value="critico">Crítico (- de 60 días)</option>
+          <option value="proximo">Próximo (2 a 6 meses)</option>
+          <option value="optimo">Óptimo (+ de 6 meses)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- CONTENEDOR PRINCIPAL: TABLA DE INVENTARIO + HISTORIAL RÁPIDO -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+      
+      <!-- Tabla de Medicamentos en Lote (2 Columnas) -->
+      <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+          <h2 class="text-base font-bold text-slate-900 dark:text-white">Catálogo de Lotes Activos</h2>
+          <span class="text-xs text-slate-400">Semáforo de caducidad automatizado</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-600 dark:text-slate-300">
+            <thead class="bg-slate-50 dark:bg-slate-900/50 text-[11px] uppercase tracking-wider text-slate-400 border-b border-slate-200 dark:border-slate-700">
+              <tr>
+                <th class="py-3 px-4">Medicamento / Sustancia</th>
+                <th class="py-3 px-3">Lote</th>
+                <th class="py-3 px-3">Stock</th>
+                <th class="py-3 px-3">Caducidad</th>
+                <th class="py-3 px-4 text-center">Estado</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-table-body" class="divide-y divide-slate-100 dark:divide-slate-700/60 font-medium">
+              
+              <!-- Ejemplo 1: Óptimo -->
+              <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                <td class="py-3.5 px-4">
+                  <span class="block font-bold text-slate-900 dark:text-white text-sm">Paracetamol 500mg</span>
+                  <span class="text-[11px] text-slate-400">Acetaminofén • Tabletas c/20</span>
+                </td>
+                <td class="py-3.5 px-3 font-mono text-slate-700 dark:text-slate-200">L-2024-89</td>
+                <td class="py-3.5 px-3">
+                  <span class="font-bold text-slate-900 dark:text-white">450</span> cajas
+                </td>
+                <td class="py-3.5 px-3">15 Dic 2027</td>
+                <td class="py-3.5 px-4 text-center">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    Óptimo
+                  </span>
+                </td>
+              </tr>
+
+              <!-- Ejemplo 2: Próximo a vencer (- de 2 meses) -->
+              <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                <td class="py-3.5 px-4">
+                  <span class="block font-bold text-slate-900 dark:text-white text-sm">Amoxicilina / Ác. Clavulánico</span>
+                  <span class="text-[11px] text-slate-400">Suspensión 250mg/62.5mg</span>
+                </td>
+                <td class="py-3.5 px-3 font-mono text-slate-700 dark:text-slate-200">L-AMX-102</td>
+                <td class="py-3.5 px-3">
+                  <span class="font-bold text-slate-900 dark:text-white">35</span> frascos
+                </td>
+                <td class="py-3.5 px-3 text-amber-600 dark:text-amber-400 font-semibold">28 Nov 2026</td>
+                <td class="py-3.5 px-4 text-center">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    Próximo (- de 2 meses)
+                  </span>
+                </td>
+              </tr>
+
+              <!-- Ejemplo 3: Crítico / Vencido -->
+              <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors bg-red-50/40 dark:bg-red-950/10">
+                <td class="py-3.5 px-4">
+                  <span class="block font-bold text-slate-900 dark:text-white text-sm">Ketorolaco Inyectable 30mg</span>
+                  <span class="text-[11px] text-slate-400">Ampolleta 1ml c/3</span>
+                </td>
+                <td class="py-3.5 px-3 font-mono text-slate-700 dark:text-slate-200">L-KTO-55</td>
+                <td class="py-3.5 px-3">
+                  <span class="font-bold text-red-600 dark:text-red-400">8</span> amp.
+                </td>
+                <td class="py-3.5 px-3 text-red-600 dark:text-red-400 font-bold">18 Oct 2026</td>
+                <td class="py-3.5 px-4 text-center">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-100 dark:bg-red-950/60 text-red-800 dark:text-red-300 border border-red-300 dark:border-red-800">
+                    <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping"></span>
+                    Crítico / Retirar
+                  </span>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Panel Lateral: Auditoría y Movimientos Recientes (1 Columna) -->
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-5">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+            Movimientos Recientes
+          </h3>
+        </div>
+
+        <div class="space-y-4 text-xs">
+          <!-- Movimiento 1: Salida -->
+          <div class="flex gap-3 items-start">
+            <div class="p-1.5 rounded-lg bg-red-50 dark:bg-red-950/60 text-red-600 mt-0.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+              </svg>
+            </div>
+            <div>
+              <p class="font-semibold text-slate-800 dark:text-slate-100">Dispensación: -2 Cajas Paracetamol</p>
+              <p class="text-[11px] text-slate-400">Receta Consulta Externa • Hace 25 min</p>
+            </div>
+          </div>
+
+          <!-- Movimiento 2: Entrada -->
+          <div class="flex gap-3 items-start">
+            <div class="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 mt-0.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+              </svg>
+            </div>
+            <div>
+              <p class="font-semibold text-slate-800 dark:text-slate-100">Entrada: +100 Suero Fisiológico 500ml</p>
+              <p class="text-[11px] text-slate-400">Proveedor Farmacéutico • Hace 2 horas</p>
+            </div>
+          </div>
+
+          <!-- Movimiento 3: Salida -->
+          <div class="flex gap-3 items-start">
+            <div class="p-1.5 rounded-lg bg-red-50 dark:bg-red-950/60 text-red-600 mt-0.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+              </svg>
+            </div>
+            <div>
+              <p class="font-semibold text-slate-800 dark:text-slate-100">Dispensación: -1 Frasco Amoxicilina</p>
+              <p class="text-[11px] text-slate-400">Urgencias Pediátricas • Hace 3 horas</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-100 dark:border-slate-700/60 text-center">
+          <button type="button" class="text-xs font-semibold text-cyan-700 dark:text-cyan-400 hover:underline cursor-pointer">
+            Ver historial completo
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- FOOTER PERMANENTE -->
+  <footer class="bg-slate-950 border-t border-slate-800 text-slate-400 py-6 text-center text-xs tracking-wider">
+    <div class="max-w-7xl mx-auto px-4">
+      <p>&copy; 2026 Centros de Orientación Familiar y Salud, I.A.P. (Hospital Mazahua). Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <!-- ======================================================== -->
+  <!-- MODAL / ALERTA CENTRADA SUPERIOR: CONFIRMACIÓN CERRAR SESIÓN -->
+  <!-- ======================================================== -->
+  <div 
+    id="logout-modal" 
+    class="fixed inset-0 z-50 flex items-start justify-center pt-8 px-4 bg-slate-950/60 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div 
+      id="logout-card" 
+      class="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-5 transform -translate-y-6 opacity-0 transition-all duration-300 relative text-slate-800 dark:text-slate-100"
+    >
+      <div class="flex items-start gap-4">
+        <div class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 flex items-center justify-center flex-shrink-0">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+        </div>
+        
+        <div class="flex-1">
+          <h3 class="text-base font-bold text-slate-900 dark:text-white">
+            ¿Estas seguro de cerrar sesión?
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Se cerrará el acceso a este panel. Deberás ingresar tus credenciales nuevamente para acceder.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-5 flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+        <button 
+          id="btn-cancel-logout" 
+          type="button" 
+          class="px-4 py-2 text-xs font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+        >
+          Cancelar
+        </button>
+        <button 
+          id="btn-confirm-logout" 
+          type="button" 
+          class="px-4 py-2 text-xs font-bold rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-md transition-all active:scale-95 cursor-pointer"
+        >
+          Sí, cerrar sesión
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT DE CONTROL DE ACCESO, MENÚ Y PROTECCIÓN DE HISTORIAL -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. GUARDIA DE SEGURIDAD: Verificar que haya sesión iniciada
+      const usuarioRaw = sessionStorage.getItem('usuario_hmazahua');
+      if (!usuarioRaw) {
+        window.location.replace('index.html');
+        return;
+      }
+
+      const usuario = JSON.parse(usuarioRaw);
+
+      // 2. Desplegar los datos del usuario en la interfaz
+      const navUserFirstName = document.getElementById('nav-user-firstname');
+      const userDisplayName = document.getElementById('user-display-name');
+      const userRoleText = document.getElementById('user-role-text');
+      const optAddUser = document.getElementById('opt-add-user');
+
+      if (navUserFirstName) navUserFirstName.textContent = usuario.nombre.split(' ')[0];
+      if (userDisplayName) userDisplayName.textContent = usuario.nombre;
+      if (userRoleText) userRoleText.textContent = `Rol: ${usuario.rol}`;
+
+      // 3. REGLA EXCLUSIVA PARA EL "Super Usuario": Habilitar registro de usuarios
+      const isSuperUser = (usuario.rol || '').trim().toLowerCase() === 'super usuario';
+      if (isSuperUser && optAddUser) {
+        optAddUser.classList.remove('hidden');
+        optAddUser.addEventListener('click', () => {
+          alert('Módulo de creación de nuevos usuarios para Super Usuario.');
+        });
+      }
+
+      // 4. LÓGICA DEL MENÚ DE HAMBURGUESA
+      const btnUserMenu = document.getElementById('btn-user-menu');
+      const userDropdown = document.getElementById('user-dropdown');
+
+      const toggleMenu = () => {
+        const isHidden = userDropdown.classList.contains('hidden');
+        if (isHidden) {
+          userDropdown.classList.remove('hidden');
+          setTimeout(() => {
+            userDropdown.classList.remove('opacity-0', 'translate-y-2');
+            userDropdown.classList.add('opacity-100', 'translate-y-0');
+          }, 10);
+        } else {
+          userDropdown.classList.remove('opacity-100', 'translate-y-0');
+          userDropdown.classList.add('opacity-0', 'translate-y-2');
+          setTimeout(() => userDropdown.classList.add('hidden'), 200);
+        }
+      };
+
+      btnUserMenu?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleMenu();
+      });
+
+      // Cerrar menú al hacer clic fuera
+      document.addEventListener('click', (e) => {
+        if (!userDropdown.contains(e.target) && !btnUserMenu.contains(e.target)) {
+          if (!userDropdown.classList.contains('hidden')) {
+            userDropdown.classList.remove('opacity-100', 'translate-y-0');
+            userDropdown.classList.add('opacity-0', 'translate-y-2');
+            setTimeout(() => userDropdown.classList.add('hidden'), 200);
+          }
+        }
+      });
+
+      // 5. ALERTA MODAL DE CONFIRMACIÓN DE CERRAR SESIÓN
+      const btnTriggerLogout = document.getElementById('btn-trigger-logout');
+      const logoutModal = document.getElementById('logout-modal');
+      const logoutCard = document.getElementById('logout-card');
+      const btnCancelLogout = document.getElementById('btn-cancel-logout');
+      const btnConfirmLogout = document.getElementById('btn-confirm-logout');
+
+      const showLogoutModal = () => {
+        userDropdown.classList.add('hidden');
+        
+        logoutModal.classList.remove('opacity-0', 'pointer-events-none');
+        logoutModal.classList.add('opacity-100', 'pointer-events-auto');
+        logoutCard.classList.remove('-translate-y-6', 'opacity-0');
+        logoutCard.classList.add('translate-y-0', 'opacity-100');
+      };
+
+      const hideLogoutModal = () => {
+        logoutCard.classList.remove('translate-y-0', 'opacity-100');
+        logoutCard.classList.add('-translate-y-6', 'opacity-0');
+        setTimeout(() => {
+          logoutModal.classList.remove('opacity-100', 'pointer-events-auto');
+          logoutModal.classList.add('opacity-0', 'pointer-events-none');
+        }, 200);
+      };
+
+      btnTriggerLogout?.addEventListener('click', showLogoutModal);
+      btnCancelLogout?.addEventListener('click', hideLogoutModal);
+
+      // Confirmar Logout Seguro
+      btnConfirmLogout?.addEventListener('click', () => {
+        sessionStorage.clear();
+        window.location.replace('index.html');
+      });
+
+      // 6. PROTECCIÓN ANTI-RETROCESO CON FLECHAS DEL NAVEGADOR
+      history.pushState(null, document.title, location.href);
+      window.addEventListener('popstate', function () {
+        history.pushState(null, document.title, location.href);
+        showLogoutModal();
+      });
+    });
+  </script>
+
+  <!-- Script Principal (Tema claro/oscuro) -->
+  <script src="./src/js/main.js"></script>
+  <script src="./src/js/location.js"></script>
+</body>
+</html>
